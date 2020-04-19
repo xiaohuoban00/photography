@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+
+		<title>评价</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/cmstyle.css" rel="stylesheet" type="text/css">
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				load(user.id,1,5)
+			});
+			function load(id,page,rows) {
+				$.ajax({
+					url:ipAddr+"/comment/selectCommentByUserId",
+					data:{
+						id:id,
+						page:page,
+						rows:rows
+					},
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					type: "get",
+					dataType:"json",
+					success:function (pb) {
+						if(pb==null){
+							return;
+						}
+						var map = new Map([[1,'好评'],[2,'中评'],[3,'差评']]);
+						var item = pb.items;
+						var route='';
+						for (let i = 0; i < item.length; i++) {
+							route+='<ul class="item-list" style="margin-top: 20px">' +
+									'<li class="td td-item">' +
+									'<div class="item-pic">' +
+									'<a href="#" class="J_MakePoint">' +
+									'<img src="'+item[i].image+'" class="itempic" style="width: 100%;height: 79px">' +
+									'</a>' +
+									'</div>' +
+									'</li>' +
+									'' +
+									'<li class="td td-comment">' +
+									'<div class="item-title">' +
+									'<div class="item-name">' +
+									'<a href="route_detail.html?id='+item[i].goodsId+'">' +
+									'<p class="item-basic-info">'+item[i].title+' '+item[i].subtitle+'</p>' +
+									'</a>' +
+									'</div>' +
+									'</div>' +
+									'<div class="item-comment">' +
+									''+'['+map.get(item[i].rating)+']'+item[i].comment+'' +
+									'</div>' +
+									'' +
+									'<div class="item-info">' +
+									'<div>';
+							if(item[i].isAgree==1){
+								route+='<p class="info-little"><span style="color: red">审核通过</span></p>';
+							}
+							if(item[i].isAgree==2){
+								route+='<p class="info-little"><span style="color: red">审核不通过，可重新评价</span></p>';
+							}
+							if(item[i].isAgree==3){
+								route+='<p class="info-little"><span style="color: red">审核中</span></p>'
+							}
+							route+='<p class="info-time">'+mill2date(item[i].commentTime)+'</p>' +
+									'</div>' +
+									'</div>' +
+									'</li>' +
+									'</ul>';
+
+						}
+						$("#commentList").html(route);
+						var pageList='';
+						var currentPage = pb.currentPage;
+						var before= currentPage-1;
+						if(before<=0){
+							before=1;
+						}
+						console.log(before);
+						pageList+='<li>\n' +
+								'<a href="javascript:void(0)" aria-label="Previous">\n' +
+								'<span aria-hidden="true" onclick="load('+id+','+before+','+rows+')">&laquo;</span>\n' +
+								'</a>\n' +
+								'</li>';
+						var begin;
+						var end;
+						if(pb.totalPage<10){
+							begin=1;
+							end=pb.totalPage;
+						}else {
+							begin=pb.currentPage-5;
+							end=pb.currentPage+4;
+							if(begin<1){
+								begin=1;
+								end=begin+9;
+							}
+							if(end>pb.totalPage){
+								end=pb.totalPage;
+								begin=end-9;
+							}
+						}
+						var li = '';
+						for(var i = begin;i<=end;i++){
+							if(i==pb.currentPage){
+								li += '<li class="active" onclick="load('+id+','+i+','+rows+')"><a href="#">'+i+'</a></li>';
+							}else {
+								li += '<li onclick="load('+id+','+i+','+rows+')"><a href="#">'+i+'</a></li>';
+							}
+						}
+						var next = pb.currentPage + 1;
+						if(next>pb.totalPage){
+							next=pb.totalPage;
+						}
+						li+='<li>\n' +
+								'<a href="#" aria-label="Next">\n' +
+								'<span aria-hidden="true" onclick="load('+id+','+next+','+rows+')">&raquo;</span>\n' +
+								'</a>\n' +
+								'</li>';
+						pageList+=li;
+						$("#pageNum").html(pageList);
+					}
+				})
+			}
+		</script>
+	</head>
+
+	<body>
+		<!--头 -->
+		<div id="header"></div>
+			<b class="line"></b>
+		<div class="center">
+			<div class="col-main">
+				<div class="main-wrap">
+
+					<div class="user-comment">
+						<!--标题 -->
+						<div class="am-cf am-padding">
+							<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">评价管理</strong> / <small>Manage&nbsp;Comment</small></div>
+						</div>
+						<hr/>
+
+						<div class="am-tabs am-tabs-d2 am-margin" data-am-tabs>
+
+							<ul class="am-avg-sm-2 am-tabs-nav am-nav am-nav-tabs">
+								<li class="am-active"><a href="#tab1">所有评价</a></li>
+							</ul>
+
+							<div class="am-tabs-bd">
+								<div class="am-tab-panel am-fade am-in am-active" id="tab1">
+									<div class="comment-main">
+										<div class="comment-top">
+										<div class="th th-price">
+											<td class="td-inner">评价</td>
+										</div>
+										<div class="th th-item">
+											<td class="td-inner">商品</td>
+										</div>
+									</div>
+										<div class="comment-list" id="commentList">
+
+										</div>
+									</div>
+								</div>
+							</div>
+							<div style="float: right">
+								<nav aria-label="Page navigation">
+									<ul class="pagination" id="pageNum">
+
+									</ul>
+								</nav>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+			<div id="menu"></div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+
+</html>

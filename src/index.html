@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>摄影工作室</title>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Bellefair&amp;subset=latin-ext" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+	<link rel="stylesheet" type="text/css" href="css/lb.css">
+    <link rel="stylesheet" type="text/css" href="css/plugins.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="js/jquery-3.3.1.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <!--导入布局js，共享header和footer-->
+    <script type="text/javascript" src="js/include.js"></script>
+    <script type="text/javascript" src="js/lb.js"></script>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .module_title{clear:both;height:25px;text-align:center;}
+        .module_sign{float:left;text-align:center;padding:5px 0 0 0px;width:100%;font-size:22px;color:#434343;font-weight:bold;}
+        .module_sign .th_tit{text-align:center;}
+        .module_sign .th_tit span{display:inline-block;}
+        .module_sign .th_tit span.s1{background:url(images/h_titbg.png) no-repeat center bottom; width:20px;height:20px;}
+        .module_sign .th_tit span.s2{margin:0 10px;height:25px;color:#434343;font-size:24px;}
+        .module_sign .th_tit span.s3{background:url(images/b_titbg.png) no-repeat center bottom; width:20px;height:20px;}
+        .module_sign .th_tit span.s4{margin:0 10px;height:25px;line-height:25px;color:#fff;font-size:24px;}
+    </style>
+</head>
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url:ipAddr+"/information/selectIndexInfo",
+            dataType:"json",
+            type:"get",
+            async:false,
+            xhrFields: {
+                withCredentials: true //允许跨域带Cookie
+            },
+            success:function (indexInfo) {
+                var lb_item='';
+                var lb_sign='';
+                var count=0;
+                var portfolio='';
+                for (var i = 1; i <=4 ; i++) {
+                    if(indexInfo.bars[i].image==null){
+                        continue;
+                    }
+                    if(i==1){
+                        lb_item+='<div class="lb-item active">\n' +
+                            '                    <a href="#">\n' +
+                            '                        <img src="'+indexInfo.bars[i].image+'" alt="picture loss">\n' +
+                            '                        <span>'+indexInfo.bars[i].description+'</span>\n' +
+                            '                    </a>\n' +
+                            '                </div>';
+                        count++;
+                        lb_sign+='<li class="active">'+count+'</li>';
+                    }else {
+                        lb_item+='<div class="lb-item">\n' +
+                            '                    <a href="#">\n' +
+                            '                        <img src="'+indexInfo.bars[i].image+'" alt="picture loss">\n' +
+                            '                        <span>'+indexInfo.bars[i].description+'</span>\n' +
+                            '                    </a>\n' +
+                            '                </div>';
+                        count++;
+                        lb_sign+='<li>'+count+'</li>';
+                    }
+                }
+                for (var i = 1; i <=8 ; i++) {
+                    if(indexInfo.imageUrl[i]==null){
+                        continue;
+                    }
+                    portfolio+='<a class="item" href="'+indexInfo.imageUrl[i]+'">\n' +
+                        '\n' +
+                        '                        <i class="fa fa-eye" aria-hidden="true"></i>\n' +
+                        '                        <div class="item-cover" style="background-image: url('+indexInfo.imageUrl[i]+')"></div>\n' +
+                        '\n' +
+                        '                    </a>';
+                }
+                $("#des").html(indexInfo.description);
+                $(".lb-content").html(lb_item);
+                $(".lb-sign").html(lb_sign);
+                $(".portfolio").html(portfolio);
+            },
+            error:function (XMLHttpRequest, textStatus, errorThrown) {
+                if(XMLHttpRequest.status==403){
+                    alert("权限不足");
+                }
+            }
+        });
+        // 轮播选项
+        const options = {
+            id: 'lb-1',              // 轮播盒ID
+            speed: 600,              // 轮播速度(ms)
+            delay: 3000,             // 轮播延迟(ms)
+            direction: 'left',       // 图片滑动方向
+            moniterKeyEvent: true,   // 是否监听键盘事件
+            moniterTouchEvent: true  // 是否监听屏幕滑动事件
+        };
+        const lb = new Lb(options);
+        lb.start();
+    })
+</script>
+<body>
+	<!--引入头部-->
+    <div id="header"></div>
+    <!-- banner start-->
+    <section id="banner">
+        <div class="lb-box" id="lb-1">
+            <!-- 轮播内容 -->
+            <div class="lb-content"></div>
+            <!-- 轮播标志 -->
+            <ol class="lb-sign">
+
+            </ol>
+            <!-- 轮播控件 -->
+            <div class="lb-ctrl left">＜</div>
+            <div class="lb-ctrl right">＞</div>
+        </div>
+    </section>
+    <!-- banner end-->
+    <!-- 旅游 start-->
+    <section id="content">
+        <div id="module_209" class="module_box">
+            <div class="module_box_inner">
+                <div class="module_title">
+						<span class="module_sign">
+						<div class="th_tit">
+							<span class="s1"></span><span class="s2" id="indexName"></span><span class="s1"></span>
+						</div>
+						<!--<div class="th_tit1">
+							Moumou Translation Co. Ltd
+						</div>-->
+						</span><span class="module_more"></span>
+                </div>
+                <div id="module_content_209" class="module_content module_content_introduct">
+						<span id="des" style="color:#666666;font-family:微软雅黑, 宋体;line-height:180%;font-size:14px;text-align:center;display:block;width:1000px;margin:0px auto;padding:20px 0 0 0;">
+
+						</span><br/>
+                </div>
+                <div class="module_title">
+						<span class="module_sign">
+						<div class="th_tit">
+							<span class="s1"></span><span class="s2">作品展示</span><span class="s1"></span>
+						</div>
+                            <!--<div class="th_tit1">
+                                Moumou Translation Co. Ltd
+                            </div>-->
+						</span><span class="module_more"></span>
+                </div>
+                <div class="portfolio" style="margin-top: 30px"></div>
+            </div>
+        </div>
+    </section>
+    <!-- 旅游 end-->
+   <!--导入底部-->
+    <div id="footer"></div>
+</body>
+</html>
+<script type="text/javascript" src="js/plugins.js"></script>
+<script type="text/javascript" src="js/main.js"></script>

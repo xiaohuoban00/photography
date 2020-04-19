@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+
+		<title>个人资料</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/colstyle.css" rel="stylesheet" type="text/css">
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+		<script type="text/javascript">
+			if(user==null){
+				alert("用户尚未登录，请登录");
+				location.href="login.html";
+			}
+			$(function () {
+				load(user.id);
+			});
+			function enter(id) {
+				location.href="route_detail.html?id="+id;
+			}
+			function delFavorite(id) {
+				$.ajax({
+					url:ipAddr+"/favorite/deleteFavoriteById",
+					data:{
+						userId:user.id,
+						goodsId:id
+					},
+					dataType:"json",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					type:"post"
+				});
+				alert("取消成功");
+				location.reload();
+			}
+			function load(id) {
+				var content='';
+				$.ajax({
+					url:ipAddr+"/favorite/selectFavById",
+					data:{
+						id:id
+					},
+					dataType:"json",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					type:"get",
+					success:function (goods) {
+						for (var i = 0; i < goods.length; i++) {
+							if(goods[i].status==false){
+								content+='<div class="s-item-wrap" id="'+goods[i].id+'">\n' +
+										'<div class="s-item">\n' +
+										'\n' +
+										'<div class="s-pic">\n' +
+										'<a href="#" class="s-pic-link">\n' +
+										'<img src="'+goods[i].imagesMap[1]+'" alt="'+goods[i].title+'" title="'+goods[i].title+'" class="s-pic-img s-guess-item-img" style="width: 220px;height: 150px">\n' +
+										'<span class="tip-title">已下架</span></a>\n' +
+										'</div>\n' +
+										'<div class="s-info">\n' +
+										'<div class="s-title"><a href="#" title="'+goods[i].title+'">'+goods[i].title+'</a></div>\n' +
+										'<div class="s-price-box">\n' +
+										'<span class="s-price"><em class="s-price-sign">¥</em><em class="s-value">'+goods[i].price+'</em></span>\n' +
+										'</div>\n' +
+										'<div class="s-extra-box">\n' +
+										'<span class="s-comment"><a href="#" onclick="delFavorite('+goods[i].id+')">取消收藏</a></span>\n' +
+										'</div>\n' +
+										'</div>\n' +
+										'</div>\n' +
+										'</div>';
+							}else {
+								content+='<div class="s-item-wrap" id="'+goods[i].id+'">\n' +
+										'<div class="s-item">\n' +
+										'\n' +
+										'<div class="s-pic">\n' +
+										'<a href="#" class="s-pic-link" onclick="enter('+goods[i].id+')">\n' +
+										'<img src="'+goods[i].imagesMap[1]+'" alt="'+goods[i].title+'" title="'+goods[i].title+'" class="s-pic-img s-guess-item-img" style="width: 220px;height: 150px">\n' +
+										'</a>\n' +
+										'</div>\n' +
+										'<div class="s-info">\n' +
+										'<div class="s-title"><a href="#" title="'+goods[i].title+'">'+goods[i].title+'</a></div>\n' +
+										'<div class="s-price-box">\n' +
+										'<span class="s-price"><em class="s-price-sign">¥</em><em class="s-value">'+goods[i].price+'</em></span>\n' +
+										'</div>\n' +
+										'<div class="s-extra-box">\n' +
+										'<span class="s-comment"><a href="#" onclick="delFavorite('+goods[i].id+')">取消收藏</a></span>\n' +
+										'</div>\n' +
+										'</div>\n' +
+										'</div>\n' +
+										'</div>';
+							}
+						}
+						$(".s-content").html(content);
+					}
+				});
+			}
+		</script>
+	</head>
+
+	<body>
+		<!--头 -->
+		<div id="header"></div>
+			<b class="line"></b>
+		<div class="center">
+			<div class="col-main">
+				<div class="main-wrap">
+					<div class="user-collection">
+						<div class="am-cf am-padding">
+							<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">我的收藏</strong></div>
+						</div>
+						<hr/>
+						<div class="you-like">
+							<div class="s-content">
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="menu"></div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+
+</html>

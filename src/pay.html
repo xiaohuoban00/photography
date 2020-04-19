@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0 ,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>结算页面</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/cartstyle.css" rel="stylesheet" type="text/css" />
+		<link href="css/jsstyle.css" rel="stylesheet" type="text/css" />
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+		<script type="text/javascript" src="js/getParameter.js"></script>
+		<script type="text/javascript">
+			if(user==null){
+				alert("用户尚未登录，请登录");
+				location.href="login.html"
+			}
+		$(function () {
+			load(getParameter("id"));
+		});
+			function checkPhone(){
+				var phone = document.getElementById('phone').value;
+				if(!(/^1[3456789]\d{9}$/.test(phone))){
+					alert("手机号码有误，请重填");
+					return false;
+				}
+				return true;
+			}
+			function pay() {
+				var way = $("#way li");
+				var payWay=null;
+				if($("#name").val()==""){
+					alert('请输入联系人');
+					return;
+				}
+				if(!checkPhone()){
+					return;
+				}
+				for (var i = 0; i < way.length; i++) {
+					if($(way[i]).attr("class").indexOf("s")>=0){
+						payWay=$(way[i]).attr("id");
+						break;
+					}
+				}
+				if(payWay==null){
+					alert("请选择支付方式");
+					return;
+				}
+				$.ajax({
+					url:ipAddr+"/aliPay/pay",
+					data:{
+						goodsId:getParameter("id"),
+						userId:user.id,
+						payMoney:$(".pay-sum").html(),
+						payWay:payWay,
+						buyerMessage:$("#buyerMessage").val(),
+						goodsTitle:$("#goodsTitle").html(),
+						name:$("#name").val(),
+						phone:$("#phone").val()
+					},
+					dataType:"html",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					type:"post",
+					success:function (data) {
+						if(data==null){
+							alert("系统错误");
+							return;
+						}else {
+							$("body").html(data);
+						}
+					}
+				})
+			}
+		function load(id) {
+			$.ajax({
+				url:ipAddr+"/goods/selectGoodsById",
+				data:{
+					id:id
+				},
+				dataType:"json",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				type:"get",
+				success:function (goods) {
+					var pay = '';
+					pay+='<li class="td td-item">\n' +
+							'<div class="item-pic">\n' +
+							'<a href="#" class="J_MakePoint">\n' +
+							'<img src="'+goods.imagesMap[1]+'" class="itempic J_ItemImg" style="width: 100%;height: 100%"></a>\n' +
+							'</div>\n' +
+							'</li>\n' +
+							'<li class="td td-info">\n' +
+							'<div class="item-info">\n' +
+							'<div class="item-basic-info">\n' +
+							'<a href="#" class="item-title J_MakePoint" data-point="tbcart.8.11" style="margin-left: 30px" id="goodsTitle">'+goods.title+" "+goods.subtitle+'</a>\n' +
+							'</div>\n' +
+							'</div>\n' +
+							'</li>';
+					$("#price").html('<em tabindex="0" class="J_ItemSum number" id="price">￥'+goods.price+'</em>');
+					$(".pay-sum").html(goods.price);
+					$("#pay").html(pay);
+				}
+			});
+		}
+	</script>
+	</head>
+
+	<body>
+
+		<div id="header"></div>
+			<div class="concent">
+				<!--地址 -->
+				<div class="paycont">
+					<!--支付方式-->
+					<div class="logistics">
+						<h3>选择支付方式</h3>
+						<ul class="pay-list" id="way">
+							<li class="pay taobao selected" id="1"><img src="images/zhifubao.jpg" />支付宝<span></span></li>
+						</ul>
+					</div>
+					<div class="clear"></div>
+
+					<!--订单 -->
+					<div class="concent">
+						<div id="payTable">
+							<h3>确认订单信息</h3>
+							<div class="cart-table-th">
+								<div class="wp">
+
+									<div class="th th-item">
+										<div class="td-inner">商品信息</div>
+									</div>
+									<div class="th th-sum">
+										<div class="td-inner">金额</div>
+									</div>
+
+								</div>
+							</div>
+						</div>
+							<div class="clear"></div>
+
+							<tr class="item-list">
+								<div class="bundle  bundle-last">
+
+									<div class="bundle-main">
+										<ul class="item-content clearfix">
+											<div class="pay-phone" id="pay"></div>
+											<li class="td td-sum" style="margin-top: 50px">
+												<div class="td-inner" id="price"></div>
+											</li>
+
+										</ul>
+										<div class="clear"></div>
+									</div>
+									</div>
+							</tr>
+						</div>
+							<div class="clear"></div>
+							</div>
+							<div class="clear"></div>
+							<div class="pay-total">
+						<!--留言-->
+							<div class="order-extra">
+								<div class="order-user-info">
+									<div class="memo">
+									<label>联系人：</label>
+									<input type="text" title="拍摄人" placeholder="联系人" class="memo-input J_MakePoint c2c-text-default" id="name">
+									<div class="msg hidden J-msg">
+										<p class="error">最多输入10个字符</p>
+									</div>
+								</div>
+									<div class="order-user-info">
+										<div class="memo">
+											<label>手机号：</label>
+											<input type="text" title="手机号" placeholder="手机号" class="memo-input J_MakePoint c2c-text-default" id="phone">
+											<div class="msg hidden J-msg">
+												<p class="error">最多输入11个字符</p>
+											</div>
+										</div>
+									<div id="holyshit257" class="memo">
+										<label>买家留言：</label>
+										<input type="text" title="买家留言" placeholder="买家留言" class="memo-input J_MakePoint c2c-text-default memo-close" id="buyerMessage">
+										<div class="msg hidden J-msg">
+											<p class="error">最多输入500个字符</p>
+										</div>
+									</div>
+
+								</div>
+
+							</div>
+							</div>
+							<!--含运费小计 -->
+							<div class="buy-point-discharge ">
+								<p class="price g_price ">
+									<span>¥</span><em class="pay-sum">244.00</em>
+								</p>
+							</div>
+					<div id="holyshit269" class="submitOrder">
+						<div class="go-btn-wrap">
+							<a onclick="pay()" href="javascript:void(0)" class="btn-go"  title="点击此按钮，提交订单">提交订单</a>
+						</div>
+					</div>
+						</div>
+			</div>
+	<div id="footer"></div>
+	</body>
+</html>

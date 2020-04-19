@@ -1,0 +1,111 @@
+<script src="js/getParameter.js" xmlns:display="http://www.w3.org/1999/xhtml"
+        xmlns:display="http://www.w3.org/1999/xhtml" xmlns:display="http://www.w3.org/1999/xhtml"></script>
+<!--<script src="js/diy.js" type="text/javascript"></script>
+<link href="css/style.css" type="text/css" rel="stylesheet"/>-->
+<link href="css/common.css" rel="stylesheet" type="text/css">
+<link href="AmazeUI-2.4.2/assets/css/admin.css" rel="stylesheet" type="text/css">
+<link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css">
+<link href="css/personal.css" rel="stylesheet" type="text/css">
+<script src="js/jquery-3.3.1.js"></script>
+<!--<link href="css/footstyle.css" rel="stylesheet" type="text/css">-->
+<style>
+    .menu_style_homepage{float:left;width:100px;height:60px;text-align:center;line-height:60px;font-size:16px;font-family:"Microsoft YaHei";margin-left:40px;margin-right:10px;}
+    .menu_style{float:left;width:100px;height:100px;text-align:center;line-height:60px;font-size:16px;font-family:"Microsoft YaHei";margin:0 10px;}
+    .menu_current a.menu{color:#C52120;text-decoration:none;background:url(images/navbg.jpg) repeat-x left bottom;}
+    .menu_box{text-align:left;height:80px;margin-top:20px;}
+    input,select,textarea,button{font-size:100%;}
+</style>
+<script>
+$(function () {
+    if(user==null){
+        $("#user").css("display","none");
+        $("#logout").css("display","none");
+    }else {
+        $(".h").css("display","none");
+        $("#user").html("欢迎回来,"+user.username);
+    }
+    $("#logout").click(function () {
+        $.ajax({
+            url:ipAddr+"/user/logout",
+            dataType:"json",
+            xhrFields: {
+                withCredentials: true //允许跨域带Cookie
+            },
+            type:"post",
+            success:function (data) {
+                if(data==true){
+                    alert("退出成功")
+                    location.href="index.html"
+                }else {
+                    alert("退出失败")
+                }
+            }
+        });
+    })
+    $.ajax({
+        url:ipAddr+"/message/selectCountByUserId",
+        dataType:"json",
+        type:"get",
+        date:{
+            id:user.id
+        },
+        xhrFields: {
+            withCredentials: true //允许跨域带Cookie
+        },
+        success:function (count) {
+            $("#count").html("消息"+count)
+        }
+    });
+})
+</script>
+<!-- 头部 start -->
+    <header id="header">
+        <div class="am-container header">
+                <ul class="message-l">
+                    <div class="topMessage">
+                        <div class="menu-hd">
+                            <span id="user"></span>
+                            <a id="logout" style="margin-left: 15px;color: red" href="javascript:void(0)" target="_top">退出登录</a>
+                            <a href="login.html" target="_top" class="h">亲，请登录</a>
+                            <a href="register.html" target="_top" class="h">免费注册</a>
+                        </div>
+                    </div>
+                </ul>
+                <ul class="message-r">
+                    <div class="topMessage my-shangcheng">
+                        <div class="menu-hd MyShangcheng"><a href="person.html" target="_top"><i class="am-icon-user am-icon-fw"></i>个人中心</a></div>
+                    </div>
+                    <div class="topMessage favorite">
+                        <div class="menu-hd"><a href="collection.html" target="_top"><i class="am-icon-heart am-icon-fw"></i><span>收藏夹</span></a>
+                        </div>
+                    </div>
+                    <div class="topMessage mini-cart">
+                        <div class="menu-hd"><a id="mc-menu-hd" href="news.html" target="_top"><i class="am-icon-magic  am-icon-fw"></i><span id="count">消息</span></a></div>
+                    </div>
+                </ul>
+
+        </div>
+        <div class="header_wrap" style="margin-left: 100px">
+            <div class="topbar">
+                <div class="logo" style="margin-top: 20px">
+                    <a href="/"><img id="img" src="images/logo.png" alt="" style="width: 207px;height: 56px"></a>
+                </div>
+                <div class="menu_box" id="Menu">
+                    <ul>
+                        <li class="menu_style_homepage" id="MenuItem61" name="MenuItem"><a href="index.html" class="menu" style="font-size: 18px">首页</a></li>
+                        <li class="menu_style" id="MenuItem67" name="MenuItem"><a href="route_list.html" class="menu" style="font-size: 18px;">项目服务</a></li>
+                        <li class="menu_style" id="MenuItem62" name="MenuItem"><a href="about_us.html" class="menu" style="font-size: 18px;">关于我们</a></li>
+                    </ul>
+                    <div class="hottel" style="margin-left: 100px;margin-left: 300px">
+                    <div class="hot_tel">
+                        <p class="hot_time">客服热线(9:00-19:00)</p>
+                        <p class="hot_num" id="number">400-618-9090</p>
+                    </div>
+                </div>
+                </div>
+
+            </div>
+        </div>
+    </header>
+    <!-- 头部 end -->
+     <!-- 首页导航 -->

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+
+		<title>退款</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/refstyle.css" rel="stylesheet" type="text/css">
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+		<script src="js/getParameter.js"></script>
+		<script type="text/javascript">
+			if(user==null){
+				alert("您尚未登录请先登录");
+				location.href="login.html";
+			}
+			$(function () {
+				$.ajax({
+					url:ipAddr+"/order/selectOrderDetailById",
+					data:{
+						orderId:getParameter("id")
+					},
+					dataType:"json",
+					type:"get",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (data) {
+						$("#image").attr("src",data.image);
+						$("#orderId").html(data.id);
+						$("#price").html(data.payMoney+"元");
+						$("#time").html(mill2date(data.paymentTime));
+						$("#subTitle").html(data.subtitle);
+						$("#title").html(data.title);
+						$("#refund-money").attr("placeholder",data.payMoney);
+					}
+				})
+			});
+			function apply() {
+				var val = $("#sel").find("option:selected").val();
+				if(val==0){
+					alert("请选择退款原因");
+					return;
+				}
+				$.ajax({
+					url:ipAddr+"/order/insertRefund",
+					data:{
+						orderId:$("#orderId").html(),
+						refundReason:val,
+						refundExplain:$("#refund-explain").val()
+					},
+					type:"post",
+					dataType:"json",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (flag) {
+						if(flag==true){
+							alert("申请成功");
+							location.href="order.html";
+						}
+					}
+				})
+			}
+		</script>
+	</head>
+
+	<body>
+		<!--头 -->
+		<div id="header"></div>
+			<b class="line"></b>
+		<div class="center">
+			<div class="col-main">
+				<div class="main-wrap">
+					<!--标题 -->
+					<div class="am-cf am-padding">
+						<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">退款申请</strong> / <small>Apply&nbsp;for&nbsp;returns</small></div>
+					</div>
+					<hr/>
+					<div class="comment-list">
+
+
+
+						<div class="refund-aside">
+							<div class="item-pic">
+								<a href="#" class="J_MakePoint">
+									<img id="image" src="images/comment.jpg_400x400.jpg" style="width: 100%;height: 60px" class="itempic">
+								</a>
+							</div>
+
+							<div class="item-title">
+
+								<div class="item-name">
+									<a href="#">
+										<p class="item-basic-info" id="title">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</p>
+									</a>
+								</div>
+								<div class="info-little">
+									<span id="subTitle">颜色：洛阳牡丹</span>
+								</div>
+							</div>
+							<div class="item-info">
+								<div class="item-ordernumber">
+									<span class="info-title">订单编号：</span><a id="orderId">1474784641639947</a>
+								</div>
+								<div class="item-price">
+									<span class="info-title">价&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;格：</span><span class="price" id="price">19.88元</span>
+								</div>
+								<div class="item-time">
+									<span class="info-title">付款时间：</span><span class="time" id="time">2015-12-12&nbsp;17:07</span>
+								</div>
+
+							</div>
+							<div class="clear"></div>
+						</div>
+
+						<div class="refund-main">
+							<div class="item-comment">
+
+								<div class="am-form-group">
+									<label  class="am-form-label" style="margin-right: 10px">退款原因</label>
+									<div class="am-form-content">
+										<select data-am-selected="" id="sel">
+											<option value="0" selected="selected">请选择退款原因</option>
+											<option value="1">不想要了</option>
+											<option value="2">买错了</option>
+											<option value="3">其他原因</option>
+										</select>
+									</div>
+								</div>
+
+								<div class="am-form-group">
+									<label for="refund-money" class="am-form-label">退款金额<span>（不可修改）</span></label>
+									<div class="am-form-content" style="margin-left: 110px">
+										<input type="text" id="refund-money" readonly="readonly" placeholder="19.88">
+									</div>
+								</div>
+								<div class="am-form-group">
+									<label  class="am-form-label">退款说明<span>（可不填）</span></label>
+									<div class="am-form-content" style="margin-left: 110px">
+										<textarea placeholder="请输入退款说明" id="refund-explain"></textarea>
+									</div>
+								</div>
+
+							</div>
+							<div class="info-btn">
+								<div class="am-btn am-btn-danger" onclick="apply()">提交申请</div>
+							</div>
+						</div>
+					</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			<div id="menu"></div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+
+</html>

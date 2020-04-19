@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+
+		<title>评价</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/appstyle.css" rel="stylesheet" type="text/css">
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+		<script src="js/getParameter.js"></script>
+		<script type="text/javascript">
+			$.ajax({
+				url:ipAddr+"/order/selectOrderDetailById",
+				data:{
+					orderId:getParameter("id")
+				},
+				type:"get",
+				dataType:"json",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (data) {
+					$("#image").attr("src",data.image);
+					$("#title").html(data.title);
+					$("#subtitle").html(data.subtitle);
+					$("#price").html(data.payMoney+"元");
+					$("#goodsId").val(data.goodsId);
+				}
+			})
+			function sub() {
+				if($(".active").attr("id")==null){
+					alert("请选择评价");
+					return;
+				}
+				if($("#comment").val()==""){
+					alert("请输入评价内容");
+					return;
+				}
+				$.ajax({
+					url:ipAddr+"/comment/insertComment",
+					data:{
+						orderId:getParameter("id"),
+						userId:user.id,
+						goodsId:$("#goodsId").val(),
+						comment:$("#comment").val(),
+						rating:$(".active").attr("id")
+					},
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					type: "post",
+					dataType:"json",
+					success:function (flag) {
+						if(flag){
+							alert("提交成功，待审核");
+							location.href="order.html";
+						}else {
+							alert("提交失败");
+						}
+
+					}
+				})
+			}
+		</script>
+	</head>
+
+	<body>
+		<!--头 -->
+		<div id="header"></div>
+			<b class="line"></b>
+		<div class="center">
+			<div class="col-main">
+				<div class="main-wrap">
+
+					<div class="user-comment">
+						<!--标题 -->
+						<div class="am-cf am-padding">
+							<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">发表评论</strong> / <small>Make&nbsp;Comments</small></div>
+						</div>
+						<hr/>
+
+						<div class="comment-main">
+							<div class="comment-list">
+								<div class="item-pic">
+									<a href="#" class="J_MakePoint">
+										<img id="image" src="" style="width: 100%;height: 100px" class="itempic">
+									</a>
+								</div>
+
+								<div class="item-title">
+
+									<div class="item-name">
+										<input type="hidden" id="goodsId">
+										<a href="#">
+											<p class="item-basic-info" id="title">美康粉黛醉美唇膏 持久保湿滋润防水不掉色</p>
+										</a>
+									</div>
+									<div class="item-info">
+										<div class="info-little">
+											<span id="subtitle">颜色：洛阳牡丹</span>
+										</div>
+										<div class="item-price">
+											价格：<strong id="price">19.88元</strong>
+										</div>
+									</div>
+								</div>
+								<div class="clear"></div>
+								<div class="item-comment">
+									<textarea placeholder="请写下对宝贝的感受吧，对他人帮助很大哦！" id="comment"></textarea>
+								</div>
+								<div class="item-opinion">
+									<li><i class="op1" id="1"></i>好评</li>
+									<li><i class="op2" id="2"></i>中评</li>
+									<li><i class="op3" id="3"></i>差评</li>
+								</div>
+							</div>
+
+							<div class="info-btn">
+								<div class="am-btn am-btn-danger" onclick="sub()">发表评论</div>
+							</div>
+							<script type="text/javascript">
+								$(document).ready(function() {
+									$(".comment-list .item-opinion li").click(function() {
+										$(this).prevAll().children('i').removeClass("active");
+										$(this).nextAll().children('i').removeClass("active");
+										$(this).children('i').addClass("active");
+									});
+								})
+							</script>
+
+
+
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+			<div id="menu"></div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+
+</html>

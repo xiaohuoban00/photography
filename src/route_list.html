@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ch">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商品列表</title>
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" href="css/search.css">
+    <script src="js/jquery-3.3.1.js"></script>
+    <script src="js/getParameter.js"></script>
+    <script type="text/javascript" src="js/include.js"></script>
+</head>
+<script>
+    $(function () {
+        var searchBtn = $("#ai-topsearch");
+        load("",true,1,10);
+        searchBtn.click(function () {
+            load($("#searchInput").val(),true,1,10);
+        });
+    });
+    function load(key, status,page,rows) {
+        $.ajax({
+            url: ipAddr+"/goods/selectGoodsByPage",
+            data:{
+                key:key,
+                status:true,
+                page:page,
+                rows:rows
+            },
+            dataType:"json",
+            xhrFields: {
+                withCredentials: true //允许跨域带Cookie
+            },
+            success:function (pb) {
+                $("#totalPage").html(pb.totalPage);
+                $("#totalCount").html(pb.total);
+                var item = pb.items;
+                var routes= '';
+                for (var i = 0; i < item.length; i++) {
+                    var src="images/04-search_03.jpg";
+                    if(item[i].imagesMap!=null){
+                        src=item[i].imagesMap[1];
+                    }
+                    var route= '<li>\n' +
+                        '                        <div class="img"><img style="width: 299px;height: 169px" src="'+src+'" alt=""></div>\n' +
+                        '                        <div class="text1">\n' +
+                        '                            <p>'+item[i].title+'</p>\n' +
+                        '                            <br/>\n' +
+                        '                            <p>'+item[i].subtitle+'</p>\n' +
+                        '                        </div>\n' +
+                        '                        <div class="price">\n' +
+                        '                            <p class="price_num">\n' +
+                        '<span>&yen;</span><span>'+item[i].price+'</span>\n' +
+                        '                            </p>\n' +
+                        '                            <p><a href="route_detail.html?id='+item[i].id+'">查看详情</a></p>\n' +
+                        '                        </div>\n' +
+                        '                    </li>';
+                    routes=routes+route;
+                }
+                $("#route").html(routes);
+                var pageList='';
+                pageList+='<li onclick="javascript:load(\''+key+'\','+status+','+1+','+rows+');"><a href="javascript:void(0)">首页</a></li>';
+                var before = pb.currentPage - 1;
+                if(before<=1){
+                    before=1;
+                }
+                var beforePage = '<li onclick="javascript:load(\''+key+'\','+status+','+before+','+rows+');" class="threeword"><a href="javascript:void(0)">上一页</a></li>';
+                pageList+=beforePage;
+                var begin;
+                var end;
+                if(pb.totalPage<10){
+                    begin=1;
+                    end=pb.totalPage;
+                }else {
+                    begin=pb.currentPage-5;
+                    end=pb.currentPage+4;
+                    if(begin<1){
+                        begin=1;
+                        end=begin+9;
+                    }
+                    if(end>pb.totalPage){
+                        end=pb.totalPage;
+                        begin=end-9;
+                    }
+                }
+                var li = '';
+                for(var i = begin;i<=end;i++){
+                    if(i==pb.currentPage){
+                        li += '<li class="curPage" onclick="javascript:load(\''+key+'\','+status+','+i+','+rows+');"><a href="javascript:void(0)">' + i + '</a></li>';
+                    }else {
+                        li += '<li onclick="javascript:load(\''+key+'\','+status+','+i+','+rows+');"><a href="javascript:void(0)">' + i + '</a></li>';
+                    }
+                }
+                pageList+=li;
+                var next = pb.currentPage + 1;
+                if(next>pb.totalPage){
+                    next=pb.totalPage;
+                }
+                pageList+='<li onclick="javascript:load(\''+key+'\','+status+','+pb.totalPage+','+rows+')" class="threeword"><a href="javascript:void(0);">下一页</a></li>';
+                pageList+='<li onclick="javascript:load(\''+key+'\','+status+','+pb.totalPage+','+rows+')" class="threeword"><a href="javascript:void(0);">末页</a></li>';
+                $("#pageNum").html(pageList);
+            }
+        });
+    }
+</script>
+<body>
+<!--引入头部-->
+<div id="header"></div>
+
+<div class="page_one">
+    <div class="contant">
+        <div class="search-bar pr">
+            <form>
+                <input id="searchInput" name="index_none_header_sysc" type="text" placeholder="搜索" autocomplete="off">
+                <input id="ai-topsearch" class="am-btn" value="搜索"  type="button">
+            </form>
+        </div>
+        <div class="xinxi clearfix">
+            <div class="left" style="margin-left: 80px">
+                <div class="header">
+                    <span>商品信息</span>
+                    <span class="jg">价格</span>
+                </div>
+                <ul id="route"></ul>
+                <div class="page_num_inf">
+                    <i></i> 共
+                    <span id="totalPage">1</span>页<span id="totalCount">1</span>条
+                </div>
+                <div class="pageNum">
+                    <ul id="pageNum">
+                        <li><a href="">首页</a></li>
+                        <li class="threeword"><a href="#">上一页</a></li>
+                        <li><a href="#">1</a></li>
+                        <li><a href="#">2</a></li>
+                        <li><a href="#">3</a></li>
+                        <li><a href="#">4</a></li>
+                        <li><a href="#">5</a></li>
+                        <li><a href="#">6</a></li>
+                        <li><a href="#">7</a></li>
+                        <li><a href="#">8</a></li>
+                        <li><a href="#">9</a></li>
+                        <li><a href="#">10</a></li>
+                        <li class="threeword"><a href="javascript:;">下一页</a></li>
+                        <li class="threeword"><a href="javascript:;">末页</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--引入头部-->
+<div id="footer"></div>
+</body>
+
+</html>

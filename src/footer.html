@@ -1,0 +1,55 @@
+<link href="css/style.css" type="text/css" rel="stylesheet"/>
+<style>
+    .bottom_box{clear:both;margin:0px 0 0px 0;text-align:left;width:100%;z-index:10;position:relative;}
+    .dubu_1{background:#434343}
+    .dubu_1 .db1_com{width:1200px;margin:0 auto;color:#FFF;padding:30px 0;}
+    .dubu_1 .db1_com .db1_c_tit{height:40px;line-height:40px;font-size:20px;font-weight:bold}
+    .dubu_1 .db1_com .db1_c_com{line-height:25px;}
+    .dubu_1 .db1_com .db1_c_com1{line-height:25px;}
+    .dubu_1 .db1_com .db1_c_com2{line-height:25px;}
+</style>
+<script>
+    $(function () {
+        $.ajax({
+            url:ipAddr+"/information/selectCommonInfo",
+            dataType:"json",
+            xhrFields: {
+                withCredentials: true //允许跨域带Cookie
+            },
+            async: false,
+            type:"get",
+            success:function (data) {
+                $(".phone").html(data.phone);
+                $("#number").html(data.phone);
+                $("#indexName").html(data.name);
+                $(".address").html(data.address);
+                $("#name").html(data.name);
+                $("#copyright").html(data.copyright);
+                $("#url").html(data.url);
+                $("#email").html(data.email);
+                $("#img").attr("src",data.logo);
+            },
+        });
+    });
+</script>
+<!-- 尾部 start-->
+    <footer id="footer" class="text-center">
+        <div class="bottom_box">
+            <div class="dubu_1">
+                <div class="db1_com">
+                    <div class="db1_c_tit" id="name">
+                        XX摄影工作室
+                    </div>
+                    <div class="db1_c_com">
+                        电话：<span class="phone">400-xxx-1080</span>&nbsp;&nbsp;&nbsp;&nbsp;Email：<span id="email">kefu@xxxx.com</span>&nbsp;&nbsp;&nbsp;&nbsp; 网址： <span id="url">http://www.xxxxxx.com</span>
+                    </div>
+                    <div class="db1_c_com1 address" >
+                        广东省肇庆市端州区肇庆学院
+                    </div>
+                    <div class="db1_c_com2" id="copyright">
+                        Copyright &copy; 2019 - 2020 Cld , All Rights Reserved XX摄影工作室   版权所有 粤ICP备1xxxxx17号
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>

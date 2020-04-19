@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+
+		<title>个人资料</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/orstyle.css" rel="stylesheet" type="text/css">
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+		<script src="js/getParameter.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				loadAll(getParameter("id"))
+			});
+			function cancelRefund(orderId) {
+				var b = confirm("你真的要取消吗？");
+				if(b){
+					$.ajax({
+						url:ipAddr+"/order/cancelRefund",
+						data:{
+							orderId:orderId+""
+						},
+						dataType:"json",
+						type:"post",
+						xhrFields: {
+							withCredentials: true //允许跨域带Cookie
+						},
+						success:function (flag) {
+							if(flag){
+								alert("取消成功");
+								location.href="order.html";
+							}else {
+								alert("取消失败");
+							}
+						}
+					})
+				}
+			}
+			function cancel(orderId){
+				var r = confirm("亲，您确定取消该订单吗？")
+				if(r==true){
+					console.log(orderId);
+					$.ajax({
+						url:ipAddr+"/order/cancelOrder",
+						data:{
+							orderId:orderId+""
+						},
+						type:"post",
+						dataType:"json",
+						xhrFields: {
+							withCredentials: true //允许跨域带Cookie
+						},
+						success:function (flag) {
+							if(flag){
+								alert("取消成功");
+								location.href="order.html"
+							}else {
+								alert("取消失败");
+								location.href="order.html"
+							}
+						}
+					})
+				}
+			}
+			function pay(orderId,title,subtitle){
+				var order=null;
+				$.ajax({
+					url:ipAddr+"/order/selectOrderByOrderId",
+					data:{
+						orderId:orderId+""
+					},
+					type:"get",
+					dataType:"json",
+					async:false,
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (data) {
+						order=data;
+					}
+				});
+				$.ajax({
+					url:ipAddr+"/aliPay/pay",
+					data:{
+						orderId:orderId+"",
+						payWay:order.paymentWay,
+						payMoney: order.payMoney,
+						goodsTitle:title+" "+subtitle
+					},
+					type:"post",
+					dataType:"html",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (data) {
+						console.log(data);
+						if(data==null){
+							alert("系统错误");
+							return;
+						}else {
+							$("body").html(data);
+						}
+					}
+				})
+			}
+			function confirmOrder(orderId){
+				var b = confirm("你真的要确认收货吗？");
+				if(b==true){
+					$.ajax({
+						url:ipAddr+"/order/confirmOrder",
+						data:{
+							orderId:orderId
+						},
+						type:"post",
+						xhrFields: {
+							withCredentials: true //允许跨域带Cookie
+						},
+						success:function (flag) {
+							if(flag){
+								alert("确认成功");
+								location.href="order.html"
+							}else {
+								alert("确认失败");
+								location.href="order.html"
+							}
+						}
+					})
+				}
+			}
+			function comment(orderId){
+				location.href="commentlist.html?id="+orderId;
+			}
+			function deleteOrder(orderId){
+				var b = confirm("你确定要删除吗？");
+				if(b==true){
+					$.ajax({
+						url:ipAddr+"/order/deleteOrderById",
+						data:{
+							orderId:orderId
+						},
+						type:"post",
+						xhrFields: {
+							withCredentials: true //允许跨域带Cookie
+						},
+						success:function (flag) {
+							if(flag){
+								alert("删除成功");
+								location.href="order.html"
+							}else {
+								alert("删除失败");
+								location.href="order.html"
+							}
+						}
+					});
+				}
+			}
+			function loadAll(id){
+				var map = new Map([[1,'不想要了'],[2,'买错了'],[3,'其他原因']]);
+				$.ajax({
+					url:ipAddr+"/order/selectOrderDetailById",
+					data:{
+						orderId:id
+					},
+					type:"get",
+					dataType:"json",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (data) {
+						var detail='';
+						var all_order='';
+							var common='<div class="order-status5">' +
+									'<div class="order-title">' +
+									'<div class="dd-num">订单编号：<a href="javascript:;">'+data.id+'</a></div>' +
+									'<span>提交时间：'+mill2date(data.createTime)+'</span>' +
+									'</div>' +
+									'<div class="order-content">' +
+									'<div class="order-left">' +
+									'<ul class="item-list">' +
+									'<li class="td td-item">' +
+									'<div class="item-pic">' +
+									'<a href="#" class="J_MakePoint">' +
+									'<img src="'+data.image+'" class="itempic J_ItemImg" style="width: 100%;height: 100%">' +
+									'</a>' +
+									'</div>' +
+									'<div class="item-info">' +
+									'<div class="item-basic-info">' +
+									'<a href='+data.goodsId+'"route_detail.html?id=">' +
+									'<p class="'+data.id+'">'+data.title+'</p>' +
+									'<p class="info-little">'+data.subtitle+'</p>'+
+									'</a>' +
+									'</div>' +
+									'</div>' +
+									'</li>' +
+									'<li class="td td-price">' +
+									'<div class="item-price">' +
+									''+data.payMoney+''+
+									'</div>' +
+									'</li>' +
+									'<li class="td td-operation">';
+							all_order+=common;
+							if(data.status==1){
+								var temp='<div class="item-operation">' +
+										'<p>30分钟内未付款订单将关闭</p>' +
+										'</div>' +
+										'</li>' +
+										'</ul>' +
+										'</div>' +
+										'<div class="order-right" style="margin-right: 50px">' +
+										'<li class="td td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">等待付款</p>' +
+										'<p class="order-info"><a href="javascript:void(0)" onclick="cancel(\''+data.id+'\')">取消订单</a></p>'+
+										'</div>' +
+										'</li>' +
+										'<li class="td td-change">' +
+										'<div class="am-btn am-btn-danger anniu" onclick="pay(\''+data.id+'\',\''+data.title+'\',\''+data.subtitle+'\')">' +
+										'付款</div>' +
+										'</li>' +
+										'</div>' +
+										'' +
+										'</div>' +
+										'</div>';
+								all_order+=temp;
+								detail='联系人：'+data.name+'<br>\n' +
+										'手机号: '+data.phone+'<br>\n' +
+										'支付方式: 支付宝<br>\n'+
+										'<button class="btn btn-default" onclick="deleteOrder(\''+data.id+'\')">删除订单</button>';
+							}
+							else if(data.status==2){
+								var temp='<div class="item-operation">' +
+										'<a href='+data.id+'"refund.html?id=">退款</a>' +
+										'</div>' +
+										'</li>' +
+										'</ul>' +
+										'</div>' +
+										'<div class="order-right" style="margin-right: 50px">' +
+										'<li class="td td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">买家已付款</p>'+
+										'</div>' +
+										'</li>' +
+										'<li class="td td-change">' +
+										'<div class="am-btn am-btn-danger anniu" onclick="confirmOrder(\''+data.id+'\')">' +
+										'确认收货</div>' +
+										'</li>' +
+										'</div>' +
+										'' +
+										'</div>' +
+										'</div>';
+								all_order+=temp;
+								detail='联系人：'+data.name+'<br>\n' +
+										'手机号: '+data.phone+'<br>\n' +
+										'支付方式: 支付宝<br>\n'+
+										'支付时间:'+mill2date(data.paymentTime)+'<br>'+
+										'<button class="btn btn-default" onclick="deleteOrder(\''+data.id+'\')">删除订单</button>';
+							}
+							else if(data.status==3){
+								var temp='<div class="item-operation">' +
+										'' +
+										'</div>' +
+										'</li>' +
+										'</ul>' +
+										'</div>' +
+										'<div class="order-right" style="margin-right: 50px">' +
+										'<li class="td td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">已完成</p>' +
+										'</div>' +
+										'</li>' +
+										'<li class="td td-change">' +
+										'<div class="am-btn am-btn-danger anniu" onclick="comment('+data.id+')">' +
+										'评价商品</div>' +
+										'</li>' +
+										'</div>' +
+										'' +
+										'</div>' +
+										'</div>';
+								all_order+=temp;
+								detail='联系人：'+data.name+'<br>\n' +
+										'手机号: '+data.phone+'<br>\n' +
+										'支付方式: 支付宝<br>\n'+
+										'支付时间:'+mill2date(data.paymentTime)+'<br>'+
+										'完成时间:'+mill2date(data.endTime)+'<br>'+
+										'<button class="btn btn-default" onclick="deleteOrder(\''+data.id+'\')">删除订单</button>'
+							}
+							else if(data.status==4){
+								var temp='<div class="item-operation">' +
+										'24小时未处理将自动退款' +
+										'</div>' +
+										'</li>' +
+										'</ul>' +
+										'</div>' +
+										'<div class="order-right" style="margin-right: 50px">' +
+										'<li class="td td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">退款中</p>' +
+										'</div>' +
+										'</li>' +
+										'<li class="td td-change">' +
+										'<div class="am-btn am-btn-danger anniu" onclick="cancelRefund(\''+data.id+'\')">' +
+										'取消申请</div>' +
+										'</li>' +
+										'</div>' +
+										'' +
+										'</div>' +
+										'</div>';
+								all_order+=temp;
+								detail='联系人：'+data.name+'<br>\n' +
+										'手机号: '+data.phone+'<br>\n' +
+										'支付方式: 支付宝<br>\n'+
+										'支付时间:'+mill2date(data.paymentTime)+'<br>';
+								$.ajax({
+									url:ipAddr+"/order/selectRefundByOrderId",
+									data:{
+										orderId:data.id
+									},
+									type:"get",
+									dataType:"json",
+									xhrFields: {
+										withCredentials: true //允许跨域带Cookie
+									},
+									async:false,
+									success:function (data) {
+										var explain = data.refundExplain==null?'无':data.refundExplain;
+										detail+='申请退款时间:'+mill2date(data.applyRefundTime)+'<br>'+
+												'退款原因:'+map.get(data.refundReason)+'<br>'+
+										'退款说明:'+explain+'<br>'
+									}
+								});
+							}
+							else if(data.status==5){
+								all_order+='<div class="item-operation">' +
+										'' +
+										'</div>' +
+										'</li>' +
+										'</ul>' +
+										'</div>' +
+										'<div class="order-right" style="margin-right: 50px">' +
+										'<li class="td td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">交易关闭</p>' +
+										'</div>' +
+										'</li>' +
+										'<li class="td td-change">' +
+										'<div class="am-btn am-btn-danger anniu" onclick="deleteOrder(\''+data.id+'\')">' +
+										'删除订单</div>' +
+										'</li>' +
+										'</div>' +
+										'' +
+										'</div>' +
+										'</div>';
+								detail='联系人：'+data.name+'<br>\n' +
+										'手机号: '+data.phone+'<br>\n' +
+										'支付方式: 支付宝<br>\n'+
+										'关闭时间:'+mill2date(data.closeTime)+'<br>'+
+										'<button class="btn btn-default" onclick="deleteOrder(\''+data.id+'\')">删除订单</button>';
+							}
+							else{
+								all_order+='<div class="item-operation">' +
+										'' +
+										'</div>' +
+										'</li>' +
+										'</ul>' +
+										'</div>' +
+										'<div class="order-right" style="margin-right: 50px">' +
+										'<li class="td td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">已完成</p>' +
+										'</div>' +
+										'</li>' +
+										'<li class="td td-change">' +
+										'<div class="am-btn am-btn-danger anniu" onclick="seeComment(\''+data.id+'\')">' +
+										'查看评价</div>' +
+										'</li>' +
+										'</div>' +
+										'' +
+										'</div>' +
+										'</div>';
+								detail='联系人：'+data.name+'<br>\n' +
+										'手机号: '+data.phone+'<br>\n' +
+										'支付方式: 支付宝<br>\n'+
+										'完成时间:'+mill2date(data.endTime)+'<br>'+
+										'<button class="btn btn-default" onclick="deleteOrder(\''+data.id+'\')">删除订单</button>';
+							}
+						$("#order").html(all_order);
+						$("#detail").html(detail);
+					}
+				});
+			}
+			function seeComment(orderId) {
+				location.href="comment.html?id="+orderId;
+			}
+		</script>
+	</head>
+
+	<body>
+		<!--头 -->
+		<div id="header"></div>
+			<b class="line"></b>
+		<div class="center">
+			<div class="col-main">
+				<div class="main-wrap">
+
+					<div class="user-orderinfo">
+
+						<!--标题 -->
+						<div class="am-cf am-padding">
+							<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">订单详情</strong> / <small>Order&nbsp;details</small></div>
+						</div>
+						<hr/>
+						<div class="order-infoaside" id="detail">
+							联系人：曾铭淇<br>
+							手机号: 13030225385<br>
+							支付方式: 支付宝<br>
+							支付时间：<br>
+						</div>
+						<!--进度条-->
+						<div class="order-infomain">
+
+							<div class="order-top">
+								<div class="th th-item">
+									<td class="td-inner">商品</td>
+								</div>
+								<div class="th th-price">
+									<td class="td-inner">单价</td>
+								</div>
+								<div class="th th-operation">
+									<td class="td-inner">商品操作</td>
+								</div>
+								<div class="th th-status">
+									<td class="td-inner">交易状态</td>
+								</div>
+								<div class="th th-change">
+									<td class="td-inner">交易操作</td>
+								</div>
+							</div>
+
+							<div class="order-main">
+								<div class="order-list" id="order"></div>
+
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+			<div id="menu"></div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+
+</html>

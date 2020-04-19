@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+
+		<title>个人资料</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/orstyle.css" rel="stylesheet" type="text/css">
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+		<script type="text/javascript">
+			if(user==null){
+				alert("用户尚未登录");
+			}
+			$(function () {
+				$.ajax({
+					url:ipAddr+"/order/selectRefundByUserId",
+					data:{
+						id:user.id
+					},
+					type:"get",
+					dataType:"json",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (data) {
+						var refund_list='';
+						for (var i = 0; i < data.length; i++) {
+							refund_list+='<div class="order-list">' +
+									'<div class="order-title">' +
+									'<div class="dd-num">退款编号：<a href="javascript:;">'+data[i].id+'</a></div>' +
+									'<span>申请时间：'+mill2date(data[i].applyRefundTime)+'</span>' +
+									'</div>' +
+									'<div class="order-content">' +
+									'<div class="order-left">' +
+									'<ul class="item-list">' +
+									'<li class="td td-item">' +
+									'<div class="item-pic">' +
+									'<a href="#" class="J_MakePoint">' +
+									'<img src="'+data[i].image+'" class="itempic J_ItemImg" style="width: 100%;height: 100%">' +
+									'</a>' +
+									'</div>' +
+									'<div class="item-info">' +
+									'<div class="item-basic-info">' +
+									'<a href="#">' +
+									'<p>'+data[i].title+'</p>' +
+									'<p class="info-little">'+data[i].subtitle+'' +
+									'</p>' +
+									'</a>' +
+									'</div>' +
+									'</div>' +
+									'</li>' +
+									'' +
+									'<ul class="td-changeorder">' +
+									'<li class="td td-orderprice">' +
+									'<div class="item-orderprice">' +
+									'<span>交易金额：</span>'+data[i].payMoney+'' +
+									'</div>' +
+									'</li>' +
+									'<li class="td td-changeprice">' +
+									'<div class="item-changeprice">' +
+									'<span>退款金额：</span>'+data[i].payMoney+'' +
+									'</div>' +
+									'</li>' +
+									'</ul>' +
+									'<div class="clear"></div>' +
+									'</ul>';
+							if(data[i].isAgree==3){
+								refund_list+='<div class="change move-right">' +
+										'<li class="td td-moneystatus td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">审核中（24小时未处理将自动退款）</p>' +
+										'' +
+										'</div>' +
+										'</li>' +
+										'</div>';
+							}
+							if(data[i].isAgree==1){
+								refund_list+='<div class="change move-right">' +
+										'<li class="td td-moneystatus td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">退款成功</p>' +
+										'' +
+										'</div>' +
+										'</li>' +
+										'</div>';
+								refund_list+='<li class="td td-change td-changebutton">\n' +
+										'<a href="javascript:void(0)">\n' +
+										'<div class="am-btn am-btn-danger anniu" onclick="deleteRefund(\''+data[i].id+'\')">\n' +
+										'删除记录</div>\n' +
+										'</a>\n' +
+										'</li></div>'
+							}
+							if(data[i].isAgree==2){
+								refund_list+='<div class="change move-right">' +
+										'<li class="td td-moneystatus td-status">' +
+										'<div class="item-status">' +
+										'<p class="Mystatus">退款被拒绝，可在消息查看原因</p>' +
+										'' +
+										'</div>' +
+										'</li>' +
+										'</div>';
+							}
+
+						}
+						$("#refund-list").html(refund_list);
+					}
+				})
+			})
+			function deleteRefund(id) {
+				var b = confirm("你确定要删除吗？");
+				if(b){
+					$.ajax({
+						url:ipAddr+"/order/deleteRefundById",
+						data:{
+							id:id
+						},
+						type:"post",
+						dataType:"json",
+						xhrFields: {
+							withCredentials: true //允许跨域带Cookie
+						},
+						success:function (flag) {
+							if(flag){
+								alert("删除成功");
+								location.reload();
+							}else {
+								alert("删除失败");
+								location.reload();
+							}
+						}
+					})
+				}
+			}
+		</script>
+	</head>
+
+	<body>
+		<!--头 -->
+		<div id="header"></div>
+			<b class="line"></b>
+		<div class="center">
+			<div class="col-main">
+				<div class="main-wrap">
+
+					<div class="user-order">
+
+						<!--标题 -->
+						<div class="am-cf am-padding">
+							<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">退换货管理</strong> / <small>Change</small></div>
+						</div>
+						<hr/>
+
+						<div class="am-tabs am-tabs-d2 am-margin" data-am-tabs>
+
+							<ul class="am-avg-sm-2 am-tabs-nav am-nav am-nav-tabs">
+								<li class="am-active"><a href="#tab1">退款管理</a></li>
+							</ul>
+
+							<div class="am-tabs-bd">
+								<div class="am-tab-panel am-fade am-in am-active" id="tab1">
+									<div class="order-top">
+										<div class="th th-item">
+											<td class="td-inner">商品</td>
+										</div>
+										<div class="th th-orderprice th-price">
+											<td class="td-inner">交易金额</td>
+										</div>
+										<div class="th th-changeprice th-price">
+											<td class="td-inner">退款金额</td>
+										</div>
+										<div class="th th-status th-moneystatus">
+											<td class="td-inner">交易状态</td>
+										</div>
+										<div class="th th-change th-changebuttom">
+											<td class="td-inner">交易操作</td>
+										</div>
+									</div>
+
+									<div class="order-main" id="refund-list"></div>
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+			</div>
+			<div id="menu"></div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+
+</html>

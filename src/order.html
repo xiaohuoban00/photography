@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+
+		<title>个人资料</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/orstyle.css" rel="stylesheet" type="text/css">
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+	</head>
+	<style>
+		.s-more-btn {color: #595959;border: 1px solid #E4EAEE; margin: 10px 7px 38px;text-align: center; cursor: pointer;font-size: 12px;height: 28px; line-height: 28px;background-color: #FFF;}
+		.am-icon-refresh:before {
+			content: "\f021";
+		}
+		.am-icon-fw {
+			width: 1.25em;
+			text-align: center;
+		}
+	</style>
+
+	<script type="text/javascript">
+		var currentPage1;
+		var currentPage2;
+		var currentPage3;
+		var currentPage4;
+		var currentPage5;
+		var all_order = '';
+		var pendingPayment='';
+		var paid = '';
+		var refund = '';
+		var toBeEvaluated = '';
+		function loadAll(id,page,rows,status){
+			$.ajax({
+				url:ipAddr+"/order/selectOrderById",
+				data:{
+					id:id,
+					page:page,
+					rows:rows,
+					status:status
+				},
+				type:"get",
+				dataType:"json",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (pg) {
+					currentPage1=pg.currentPage;
+					var data = pg.items;
+					for (var i = 0; i <data.length; i++) {
+						var common='<div class="order-status5">' +
+								'<div class="order-title">' +
+								'<div class="dd-num">订单编号：<a href="javascript:;">'+data[i].id+'</a></div>' +
+								'<span>提交时间：'+mill2date(data[i].createTime)+'</span>' +
+								'</div>' +
+								'<div class="order-content">' +
+								'<div class="order-left">' +
+								'<ul class="item-list">' +
+								'<li class="td td-item">' +
+								'<div class="item-pic">' +
+								'<a href="#" class="J_MakePoint">' +
+								'<img src="'+data[i].image+'" class="itempic J_ItemImg" style="width: 100%;height: 100%">' +
+								'</a>' +
+								'</div>' +
+								'<div class="item-info">' +
+								'<div class="item-basic-info">' +
+								'<a href='+data[i].goodsId+'"route_detail.html?id=">' +
+								'<p>'+data[i].title+'</p>' +
+								'<p class="info-little">'+data[i].subtitle+'</p>'+
+								'</a>' +
+								'</div>' +
+								'</div>' +
+								'</li>' +
+								'<li class="td td-price">' +
+								'<div class="item-price">' +
+								''+data[i].payMoney+''+
+								'</div>' +
+								'</li>' +
+								'<li class="td td-operation">';
+						all_order+=common;
+						if(data[i].status==1){
+							var temp='<div class="item-operation">' +
+									'<p>30分钟内未付款订单将关闭</p>' +
+									'</div>' +
+									'</li>' +
+									'</ul>' +
+									'</div>' +
+									'<div class="order-right" style="margin-right: 50px">' +
+									'<li class="td td-status">' +
+									'<div class="item-status">' +
+									'<p class="Mystatus">等待付款</p>' +
+									'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+									'<p class="order-info"><a href="javascript:void(0)" onclick="cancel(\''+data[i].id+'\')">取消订单</a></p>'+
+									'</div>' +
+									'</li>' +
+									'<li class="td td-change">' +
+									'<div class="am-btn am-btn-danger anniu" onclick="pay(\''+data[i].id+'\',\''+data[i].title+'\',\''+data[i].subtitle+'\')">' +
+									'付款</div>' +
+									'</li>' +
+									'</div>' +
+									'' +
+									'</div>' +
+									'</div>';
+							all_order+=temp;
+						}
+						else if(data[i].status==2){
+							var temp='<div class="item-operation">' +
+									'<a href="refund.html?id='+data[i].id+'">退款</a>' +
+									'</div>' +
+									'</li>' +
+									'</ul>' +
+									'</div>' +
+									'<div class="order-right" style="margin-right: 50px">' +
+									'<li class="td td-status">' +
+									'<div class="item-status">' +
+									'<p class="Mystatus">买家已付款</p>' +
+									'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+									'</div>' +
+									'</li>' +
+									'<li class="td td-change">' +
+									'<div class="am-btn am-btn-danger anniu" onclick="confirmOrder(\''+data[i].id+'\')">' +
+									'确认收货</div>' +
+									'</li>' +
+									'</div>' +
+									'' +
+									'</div>' +
+									'</div>';
+							all_order+=temp;
+						}
+						else if(data[i].status==3){
+							var temp='<div class="item-operation">' +
+									'' +
+									'</div>' +
+									'</li>' +
+									'</ul>' +
+									'</div>' +
+									'<div class="order-right" style="margin-right: 50px">' +
+									'<li class="td td-status">' +
+									'<div class="item-status">' +
+									'<p class="Mystatus">已完成</p>' +
+									'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+									'</div>' +
+									'</li>' +
+									'<li class="td td-change">' +
+									'<div class="am-btn am-btn-danger anniu" onclick="comment(\''+data[i].id+'\')">' +
+									'评价商品</div>' +
+									'</li>' +
+									'</div>' +
+									'' +
+									'</div>' +
+									'</div>';
+							all_order+=temp;
+						}
+						else if(data[i].status==4){
+							var temp='<div class="item-operation">' +
+									'' +
+									'</div>' +
+									'</li>' +
+									'</ul>' +
+									'</div>' +
+									'<div class="order-right" style="margin-right: 50px">' +
+									'<li class="td td-status">' +
+									'<div class="item-status">' +
+									'<p class="Mystatus">退款中</p>' +
+									'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+									'</div>' +
+									'</li>' +
+									'<li class="td td-change">' +
+									'<div class="am-btn am-btn-danger anniu" onclick="cancelRefund(\''+data[i].id+'\')">' +
+									'取消申请</div>' +
+									'</li>' +
+									'</div>' +
+									'' +
+									'</div>' +
+									'</div>';
+							all_order+=temp;
+						}
+						else if(data[i].status==5){
+							all_order+='<div class="item-operation">' +
+									'' +
+									'</div>' +
+									'</li>' +
+									'</ul>' +
+									'</div>' +
+									'<div class="order-right" style="margin-right: 50px">' +
+									'<li class="td td-status">' +
+									'<div class="item-status">' +
+									'<p class="Mystatus">交易关闭</p>' +
+									'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+									'</div>' +
+									'</li>' +
+									'<li class="td td-change">' +
+									'<div class="am-btn am-btn-danger anniu" onclick="deleteOrder(\''+data[i].id+'\')">' +
+									'删除订单</div>' +
+									'</li>' +
+									'</div>' +
+									'' +
+									'</div>' +
+									'</div>';
+						}
+						else{
+							all_order+='<div class="item-operation">' +
+									'' +
+									'</div>' +
+									'</li>' +
+									'</ul>' +
+									'</div>' +
+									'<div class="order-right" style="margin-right: 50px">' +
+									'<li class="td td-status">' +
+									'<div class="item-status">' +
+									'<p class="Mystatus">已完成</p>' +
+									'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+									'</div>' +
+									'</li>' +
+									'<li class="td td-change">' +
+									'<div class="am-btn am-btn-danger anniu" onclick="seeComment(\''+data[i].id+'\')">' +
+									'查看评价</div>' +
+									'</li>' +
+									'</div>' +
+									'' +
+									'</div>' +
+									'</div>';
+						}
+					}
+					$("#all_order").html(all_order);
+				}
+			});
+		}
+		function loadPend(id,page,rows,status){
+			$.ajax({
+				url:ipAddr+"/order/selectOrderById",
+				data:{
+					id:id,
+					page:page,
+					rows:rows,
+					status:status
+				},
+				type:"get",
+				dataType:"json",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (pg) {
+					currentPage2=pg.currentPage;
+					var data = pg.items;
+					for (var i = 0; i <data.length; i++) {
+						var common='<div class="order-status5">' +
+								'<div class="order-title">' +
+								'<div class="dd-num">订单编号：<a href="javascript:;">'+data[i].id+'</a></div>' +
+								'<span>提交时间：'+mill2date(data[i].createTime)+'</span>' +
+								'</div>' +
+								'<div class="order-content">' +
+								'<div class="order-left">' +
+								'<ul class="item-list">' +
+								'<li class="td td-item">' +
+								'<div class="item-pic">' +
+								'<a href="#" class="J_MakePoint">' +
+								'<img src="'+data[i].image+'" class="itempic J_ItemImg" style="width: 100%;height: 100%">' +
+								'</a>' +
+								'</div>' +
+								'<div class="item-info">' +
+								'<div class="item-basic-info">' +
+								'<a href='+data[i].goodsId+'"route_detail.html?id=">' +
+								'<p class="'+data[i].id+'">'+data[i].title+'</p>' +
+								'<p class="info-little">'+data[i].subtitle+'</p>'+
+								'</a>' +
+								'</div>' +
+								'</div>' +
+								'</li>' +
+								'<li class="td td-price">' +
+								'<div class="item-price">' +
+								''+data[i].payMoney+''+
+								'</div>' +
+								'</li>' +
+								'<li class="td td-operation">'+
+								'<div class="item-operation">' +
+								'<p>30分钟内未付款订单将关闭</p>' +
+								'</div>' +
+								'</li>' +
+								'</ul>' +
+								'</div>' +
+								'<div class="order-right" style="margin-right: 50px">' +
+								'<li class="td td-status">' +
+								'<div class="item-status">' +
+								'<p class="Mystatus">等待付款</p>' +
+								'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+								'<p class="order-info"><a href="javascript:void(0)" onclick="cancel(\''+data[i].id+'\')">取消订单</a></p>'+
+								'</div>' +
+								'</li>' +
+								'<li class="td td-change">' +
+								'<div class="am-btn am-btn-danger anniu" onclick="pay(\''+data[i].id+'\',\''+data[i].title+'\',\''+data[i].subtitle+'\')">' +
+								'付款</div>' +
+								'</li>' +
+								'</div>' +
+								'' +
+								'</div>' +
+								'</div>';
+						pendingPayment+=common;
+					}
+					$("#pendingPayment").html(pendingPayment)
+				}
+			})
+		}
+		function loadPaid(id,page,rows,status){
+			$.ajax({
+				url:ipAddr+"/order/selectOrderById",
+				data:{
+					id:id,
+					page:page,
+					rows:rows,
+					status:status
+				},
+				type:"get",
+				dataType:"json",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (pg) {
+					currentPage3=pg.currentPage;
+					var data = pg.items;
+					for (var i = 0; i <data.length; i++) {
+						var common='<div class="order-status5">' +
+								'<div class="order-title">' +
+								'<div class="dd-num">订单编号：<a href="javascript:;">'+data[i].id+'</a></div>' +
+								'<span>提交时间：'+mill2date(data[i].createTime)+'</span>' +
+								'</div>' +
+								'<div class="order-content">' +
+								'<div class="order-left">' +
+								'<ul class="item-list">' +
+								'<li class="td td-item">' +
+								'<div class="item-pic">' +
+								'<a href="#" class="J_MakePoint">' +
+								'<img src="'+data[i].image+'" class="itempic J_ItemImg" style="width: 100%;height: 100%">' +
+								'</a>' +
+								'</div>' +
+								'<div class="item-info">' +
+								'<div class="item-basic-info">' +
+								'<a href='+data[i].goodsId+'"route_detail.html?id=">' +
+								'<p>'+data[i].title+'</p>' +
+								'<p class="info-little">'+data[i].subtitle+'</p>'+
+								'</a>' +
+								'</div>' +
+								'</div>' +
+								'</li>' +
+								'<li class="td td-price">' +
+								'<div class="item-price">' +
+								''+data[i].payMoney+''+
+								'</div>' +
+								'</li>' +
+								'<li class="td td-operation">';
+						var temp='<div class="item-operation">' +
+								'<a href="refund.html?id='+data[i].id+'">退款</a>' +
+								'</div>' +
+								'</li>' +
+								'</ul>' +
+								'</div>' +
+								'<div class="order-right" style="margin-right: 50px">' +
+								'<li class="td td-status">' +
+								'<div class="item-status">' +
+								'<p class="Mystatus">买家已付款</p>' +
+								'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+								'</div>' +
+								'</li>' +
+								'<li class="td td-change">' +
+								'<div class="am-btn am-btn-danger anniu" onclick="confirmOrder(\''+data[i].id+'\')">' +
+								'确认收货</div>' +
+								'</li>' +
+								'</div>' +
+								'' +
+								'</div>' +
+								'</div>';
+						paid+=common+temp;
+					}
+					$("#paid").html(paid)
+				}
+			})
+		}
+		function loadRefund(id,page,rows,status){
+			$.ajax({
+				url:ipAddr+"/order/selectOrderById",
+				data:{
+					id:id,
+					page:page,
+					rows:rows,
+					status:status
+				},
+				type:"get",
+				dataType:"json",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (pg) {
+					currentPage4=pg.currentPage;
+					var data = pg.items;
+					for (var i = 0; i <data.length; i++) {
+						var common='<div class="order-status5">' +
+								'<div class="order-title">' +
+								'<div class="dd-num">订单编号：<a href="javascript:;">'+data[i].id+'</a></div>' +
+								'<span>提交时间：'+mill2date(data[i].createTime)+'</span>' +
+								'</div>' +
+								'<div class="order-content">' +
+								'<div class="order-left">' +
+								'<ul class="item-list">' +
+								'<li class="td td-item">' +
+								'<div class="item-pic">' +
+								'<a href="#" class="J_MakePoint">' +
+								'<img src="'+data[i].image+'" class="itempic J_ItemImg" style="width: 100%;height: 100%">' +
+								'</a>' +
+								'</div>' +
+								'<div class="item-info">' +
+								'<div class="item-basic-info">' +
+								'<a href='+data[i].goodsId+'"route_detail.html?id=">' +
+								'<p>'+data[i].title+'</p>' +
+								'<p class="info-little">'+data[i].subtitle+'</p>'+
+								'</a>' +
+								'</div>' +
+								'</div>' +
+								'</li>' +
+								'<li class="td td-price">' +
+								'<div class="item-price">' +
+								''+data[i].payMoney+''+
+								'</div>' +
+								'</li>' +
+								'<li class="td td-operation">';
+						var temp='<div class="item-operation">' +
+								'' +
+								'</div>' +
+								'</li>' +
+								'</ul>' +
+								'</div>' +
+								'<div class="order-right" style="margin-right: 50px">' +
+								'<li class="td td-status">' +
+								'<div class="item-status">' +
+								'<p class="Mystatus">退款中</p>' +
+								'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+								'</div>' +
+								'</li>' +
+								'<li class="td td-change">' +
+								'<div class="am-btn am-btn-danger anniu" onclick="cancelRefund(\''+data[i].id+'\')">' +
+								'取消申请</div>' +
+								'</li>' +
+								'</div>' +
+								'' +
+								'</div>' +
+								'</div>';
+						refund+=common+temp;
+					}
+					$("#refund").html(refund)
+				}
+			})
+		}
+		function cancelRefund(orderId) {
+			var b = confirm("你真的要取消吗？");
+			if(b){
+				$.ajax({
+					url:ipAddr+"/order/cancelRefund",
+					data:{
+						orderId:orderId+""
+					},
+					dataType:"json",
+					type:"post",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (flag) {
+						if(flag){
+							alert("取消成功");
+							location.href="order.html";
+						}else {
+							alert("取消失败");
+						}
+					}
+				})
+			}
+		}
+		function loadToBeEvaluated(id,page,rows,status){
+			$.ajax({
+				url:ipAddr+"/order/selectOrderById",
+				data:{
+					id:id,
+					page:page,
+					rows:rows,
+					status:status
+				},
+				type:"get",
+				dataType:"json",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (pg) {
+					currentPage5=pg.currentPage;
+					var data = pg.items;
+					for (var i = 0; i <data.length; i++) {
+						var common='<div class="order-status5">' +
+								'<div class="order-title">' +
+								'<div class="dd-num">订单编号：<a href="javascript:;">'+data[i].id+'</a></div>' +
+								'<span>提交时间：'+mill2date(data[i].createTime)+'</span>' +
+								'</div>' +
+								'<div class="order-content">' +
+								'<div class="order-left">' +
+								'<ul class="item-list">' +
+								'<li class="td td-item">' +
+								'<div class="item-pic">' +
+								'<a href="#" class="J_MakePoint">' +
+								'<img src="'+data[i].image+'" class="itempic J_ItemImg" style="width: 100%;height: 100%">' +
+								'</a>' +
+								'</div>' +
+								'<div class="item-info">' +
+								'<div class="item-basic-info">' +
+								'<a href='+data[i].goodsId+'"route_detail.html?id=">' +
+								'<p>'+data[i].title+'</p>' +
+								'<p class="info-little">'+data[i].subtitle+'</p>'+
+								'</a>' +
+								'</div>' +
+								'</div>' +
+								'</li>' +
+								'<li class="td td-price">' +
+								'<div class="item-price">' +
+								''+data[i].payMoney+''+
+								'</div>' +
+								'</li>' +
+								'<li class="td td-operation">';
+						var temp='<div class="item-operation">' +
+								'' +
+								'</div>' +
+								'</li>' +
+								'</ul>' +
+								'</div>' +
+								'<div class="order-right" style="margin-right: 50px">' +
+								'<li class="td td-status">' +
+								'<div class="item-status">' +
+								'<p class="Mystatus">已完成</p>' +
+								'<p class="order-info"><a href="orderinfo.html?id='+data[i].id+'">订单详情</a></p>' +
+								'</div>' +
+								'</li>' +
+								'<li class="td td-change">' +
+								'<div class="am-btn am-btn-danger anniu" onclick="comment(\''+data[i].id+'\')">' +
+								'评价商品</div>' +
+								'</li>' +
+								'</div>' +
+								'' +
+								'</div>' +
+								'</div>';
+						toBeEvaluated+=common+temp;
+					}
+					$("#toBeEvaluated").html(toBeEvaluated)
+				}
+			})
+		}
+		function cancel(orderId){
+			var r = confirm("亲，您确定取消该订单吗？")
+			if(r==true){
+				console.log(orderId);
+				$.ajax({
+					url:ipAddr+"/order/cancelOrder",
+					data:{
+						orderId:orderId+""
+					},
+					type:"post",
+					dataType:"json",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (flag) {
+						if(flag){
+							alert("取消成功");
+							location.reload();
+						}else {
+							alert("取消失败");
+							location.reload();
+						}
+					}
+				})
+			}
+		}
+		function pay(orderId,title,subtitle){
+			var order=null;
+			$.ajax({
+				url:ipAddr+"/order/selectOrderByOrderId",
+				data:{
+					orderId:orderId+""
+				},
+				type:"get",
+				dataType:"json",
+				async:false,
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (data) {
+					order=data;
+				}
+			});
+			$.ajax({
+				url:ipAddr+"/aliPay/pay",
+				data:{
+					orderId:orderId+"",
+					payWay:order.paymentWay,
+					payMoney: order.payMoney,
+					goodsTitle:title+" "+subtitle
+				},
+				type:"post",
+				dataType:"html",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (data) {
+					console.log(data);
+					if(data==null){
+						alert("系统错误");
+						return;
+					}else {
+						$("body").html(data);
+					}
+				}
+			})
+		}
+		function confirmOrder(orderId){
+			var b = confirm("你真的要确认收货吗？");
+			if(b==true){
+				$.ajax({
+					url:ipAddr+"/order/confirmOrder",
+					data:{
+						orderId:orderId
+					},
+					type:"post",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (flag) {
+						if(flag){
+							alert("确认成功");
+							location.reload();
+						}else {
+							alert("确认失败");
+							location.reload();
+						}
+					}
+				})
+			}
+		}
+		function comment(orderId){
+			location.href="commentlist.html?id="+orderId;
+		}
+		function seeComment(orderId) {
+			location.href="comment.html?id="+orderId;
+		}
+		function deleteOrder(orderId){
+			var b = confirm("你确定要删除吗？");
+			if(b==true){
+				$.ajax({
+					url:ipAddr+"/order/deleteOrderById",
+					data:{
+						orderId:orderId
+					},
+					type:"post",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (flag) {
+						if(flag){
+							alert("删除成功");
+							location.reload();
+						}else {
+							alert("删除失败");
+							location.reload();
+						}
+					}
+				});
+			}
+		}
+		$(function () {
+			loadAll(user.id,1,5,0);
+			loadPend(user.id,1,5,1);
+			loadPaid(user.id,1,5,2);
+			loadRefund(user.id,1,5,4);
+			loadToBeEvaluated(user.id,1,5,3);
+			$("#more1").click(function () {
+				if(currentPage1==null){
+					return;
+				}
+				currentPage1++;
+				loadAll(user.id,currentPage1,5,0);
+			});
+			$("#more2").click(function () {
+				if(currentPage2==null){
+					return;
+				}
+				currentPage2++;
+				loadPend(user.id,currentPage2,5,1);
+			});
+			$("#more3").click(function () {
+				if(currentPage3==null){
+					return;
+				}
+				currentPage3++;
+				loadPaid(user.id,currentPage3,5,2);
+			});
+			$("#more4").click(function () {
+				if(currentPage4==null){
+					return;
+				}
+				currentPage4++;
+				loadRefund(user.id,currentPage4,5,4);
+			});
+			$("#more5").click(function () {
+				if(currentPage5==null){
+					return;
+				}
+				currentPage5++;
+				loadRefund(user.id,currentPage5,5,3);
+			});
+			});
+	</script>
+
+	<body>
+		<!--头 -->
+		<div id="header"></div>
+			<b class="line"></b>
+		<div class="center">
+			<div class="col-main">
+				<div class="main-wrap">
+
+					<div class="user-order">
+
+						<!--标题 -->
+						<div class="am-cf am-padding">
+							<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">订单管理</strong> / <small>Order</small></div>
+						</div>
+						<hr/>
+
+						<div class="am-tabs am-tabs-d2 am-margin" data-am-tabs>
+
+							<ul class="am-avg-sm-5 am-tabs-nav am-nav am-nav-tabs">
+								<li class="am-active"><a href="#tab1">所有订单</a></li>
+								<li><a href="#tab2">待付款</a></li>
+								<li><a href="#tab3">已付款</a></li>
+								<li><a href="#tab4">退款中</a></li>
+								<li><a href="#tab5">待评价</a></li>
+							</ul>
+
+							<div class="am-tabs-bd">
+								<div class="am-tab-panel am-fade am-in am-active" id="tab1">
+									<div class="order-top">
+										<div class="th th-item">
+											<td class="td-inner">商品</td>
+										</div>
+										<div class="th th-price">
+											<td class="td-inner">单价</td>
+										</div>
+										<div class="th th-operation">
+											<td class="td-inner">商品操作</td>
+										</div>
+										<div class="th th-status">
+											<td class="td-inner">交易状态</td>
+										</div>
+										<div class="th th-change">
+											<td class="td-inner">交易操作</td>
+										</div>
+									</div>
+
+									<div class="order-main">
+										<div class="order-list" id="all_order"></div>
+										<div class="s-more-btn i-load-more-item" data-screen="0" id="more1"><i class="am-icon-refresh am-icon-fw"></i>更多</div>
+									</div>
+
+								</div>
+								<div class="am-tab-panel am-fade" id="tab2">
+
+									<div class="order-top">
+										<div class="th th-item">
+											<td class="td-inner">商品</td>
+										</div>
+										<div class="th th-price">
+											<td class="td-inner">单价</td>
+										</div>
+										<div class="th th-operation">
+											<td class="td-inner">商品操作</td>
+										</div>
+										<div class="th th-status">
+											<td class="td-inner">交易状态</td>
+										</div>
+										<div class="th th-change">
+											<td class="td-inner">交易操作</td>
+										</div>
+									</div>
+
+									<div class="order-main">
+										<div class="order-list" id="pendingPayment">
+
+										</div>
+										<div class="s-more-btn i-load-more-item" data-screen="0" id="more2"><i class="am-icon-refresh am-icon-fw"></i>更多</div>
+									</div>
+								</div>
+								<div class="am-tab-panel am-fade" id="tab3">
+									<div class="order-top">
+										<div class="th th-item">
+											<td class="td-inner">商品</td>
+										</div>
+										<div class="th th-price">
+											<td class="td-inner">单价</td>
+										</div>
+										<div class="th th-operation">
+											<td class="td-inner">商品操作</td>
+										</div>
+										<div class="th th-status">
+											<td class="td-inner">交易状态</td>
+										</div>
+										<div class="th th-change">
+											<td class="td-inner">交易操作</td>
+										</div>
+									</div>
+
+									<div class="order-main">
+										<div class="order-list" id="paid">
+
+										</div>
+										<div class="s-more-btn i-load-more-item" data-screen="0" id="more3"><i class="am-icon-refresh am-icon-fw"></i>更多</div>
+									</div>
+								</div>
+								<div class="am-tab-panel am-fade" id="tab4">
+									<div class="order-top">
+										<div class="th th-item">
+											<td class="td-inner">商品</td>
+										</div>
+										<div class="th th-price">
+											<td class="td-inner">单价</td>
+										</div>
+										<div class="th th-operation">
+											<td class="td-inner">商品操作</td>
+										</div>
+										<div class="th th-status">
+											<td class="td-inner">交易状态</td>
+										</div>
+										<div class="th th-change">
+											<td class="td-inner">交易操作</td>
+										</div>
+									</div>
+
+									<div class="order-main">
+										<div class="order-list" id="refund">
+
+										</div>
+										<div class="s-more-btn i-load-more-item" data-screen="0" id="more4"><i class="am-icon-refresh am-icon-fw"></i>更多</div>
+									</div>
+								</div>
+
+								<div class="am-tab-panel am-fade" id="tab5">
+									<div class="order-top">
+										<div class="th th-item">
+											<td class="td-inner">商品</td>
+										</div>
+										<div class="th th-price">
+											<td class="td-inner">单价</td>
+										</div>
+										<div class="th th-operation">
+											<td class="td-inner">商品操作</td>
+										</div>
+										<div class="th th-status">
+											<td class="td-inner">交易状态</td>
+										</div>
+										<div class="th th-change">
+											<td class="td-inner">交易操作</td>
+										</div>
+									</div>
+
+									<div class="order-main">
+										<div class="order-list" id="toBeEvaluated"></div>
+
+									</div>
+									<div class="s-more-btn i-load-more-item" data-screen="0" id="more5"><i class="am-icon-refresh am-icon-fw"></i>更多</div>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="menu"></div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+
+</html>

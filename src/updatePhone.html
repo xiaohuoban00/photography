@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=0">
+
+		<title>个人资料</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+		<link href="css/infstyle.css" rel="stylesheet" type="text/css">
+		<script src="js/jquery-3.3.1.js"></script>
+		<script src="AmazeUI-2.4.2/assets/js/amazeui.js"></script>
+		<script src="js/include.js"></script>
+	</head>
+	<script type="text/javascript">
+		$(function () {
+			$("#codeBtu").click(function () {
+				if(!checkPhone()){
+					return;
+				}
+				codeButton();
+			});
+			$("#save").click(function () {
+				if(!checkPhone()){
+					return;
+				}
+				$.ajax({
+					url:ipAddr+"/user/updatePhoneById",
+					data:{
+						newPhone:$("#phone").val(),
+						code:$("#code").val()
+					},
+					type:"post",
+					dataType:"json",
+					xhrFields: {
+						withCredentials: true //允许跨域带Cookie
+					},
+					success:function (data) {
+						if(data.msg=="修改成功"){
+							alert(data.msg);
+							location.reload();
+						}else {
+							alert(data.msg);
+						}
+					}
+				})
+			});
+		});
+		function codeButton(){
+			$.ajax({
+				url:ipAddr+"/user/sendVerifyCode",
+				data:{
+					phone:$("#phone").val()
+				},
+				type:"post",
+				dataType:"json",
+				xhrFields: {
+					withCredentials: true //允许跨域带Cookie
+				},
+				success:function (data) {
+					alert(data.msg);
+				}
+			});
+			var code = $("#codeBtu");
+			code.attr("disabled","disabled");
+			setTimeout(function(){
+				code.css("opacity","0.8");
+			},1000)
+			var time = 60;
+			var set=setInterval(function(){
+				code.html(""+--time+"秒后重新获取");
+			}, 1000);
+			setTimeout(function(){
+				code.attr("disabled",false).html("重新获取验证码");
+				clearInterval(set);
+			}, 60000);
+		}
+		function checkPhone(){
+			var phone = document.getElementById('phone').value;
+			if($("#phone").val()==null||$("#phone").val()==""){
+				alert("请输入手机号");
+				return false;
+			}
+			if(!(/^1[3456789]\d{9}$/.test(phone))){
+				alert("手机号码有误，请重填");
+				return false;
+			}
+			return true;
+		}
+	</script>
+
+	<body>
+		<!--头 -->
+		<div id="header"></div>
+			<b class="line"></b>
+		<div class="center">
+			<div class="col-main">
+				<div class="main-wrap">
+
+					<div class="user-info">
+						<!--标题 -->
+						<div class="am-cf am-padding">
+							<div class="am-fl am-cf"><strong class="am-text-danger am-text-lg">修改密码</strong></div>
+						</div>
+						<hr/>
+
+						<!--个人信息 -->
+						<div class="info-main ">
+							<form class="form-horizontal">
+								<div class="form-group">
+									<label class="col-sm-2 control-label">新手机号</label>
+									<div class="col-sm-10">
+										<input type="text" class="form-control" id="phone" placeholder="新手机号">
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-2 control-label">验证码</label>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" id="code" placeholder="验证码">
+									</div>
+									<button type="button" id="codeBtu" class="btn btn-default">获取验证码</button>
+								</div>
+								<div class="info-btn">
+									<div class="am-btn am-btn-danger" id="save">保存修改</div>
+								</div>
+							</form>
+						</div>
+
+					</div>
+
+				</div>
+				<!--底部-->
+
+			</div>
+			<div id="menu"></div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+
+</html>

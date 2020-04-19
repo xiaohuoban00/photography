@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <title>关于我们</title>
+</head>
+<link href="AmazeUI-2.4.2/assets/css/admin.css" rel="stylesheet" type="text/css">
+<link href="AmazeUI-2.4.2/assets/css/amazeui.css" rel="stylesheet" type="text/css">
+<link href="css/personal.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="js/jquery-3.3.1.js"></script>
+<script type="text/javascript" src="js/include.js"></script>
+<script type="text/javascript" src="js/getParameter.js"></script>
+<body>
+<div id="header"></div>
+<b class="line"></b>
+<div class="am-g am-g-fixed blog-g-fixed bloglist">
+    <div class=""style="width: 75%;margin-bottom: 20px">
+        <article class="blog-main">
+            <div class="am-g blog-content" style="">
+                <div class="am-u-sm-12" id="content">
+
+                </div>
+
+            </div>
+
+        </article>
+
+    </div>
+
+
+
+</div>
+
+</div>
+<div id="footer"></div>
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url:ipAddr+"/information/selectAboutUs",
+            type:"get",
+            dataType:"json",
+            xhrFields: {
+                withCredentials: true //允许跨域带Cookie
+            },
+            success:function (data) {
+                $("#content").html(data.about);
+            }
+        });
+    })
+</script>
+</body>
+</html>

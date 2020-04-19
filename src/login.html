@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登录</title>
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/login.css">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--导入jquery-->
+	<script src="js/jquery-3.3.1.js"></script>
+	<script>
+		function checkUsername(){
+			var phone = $("#phone").val();
+			if(phone==""){
+				$("#phone").css("border","1px solid red");
+				return false;
+			}else {
+				return true;
+			}
+		}
+		function checkPassword(){
+			var password = $("#password").val();
+			if(password==""){
+				$("#password").css("border","1px solid red");
+				return false;
+			}else {
+				return true;
+			}
+		}
+		$(function () {
+			$("#btn_login").click(function () {
+				if(checkUsername()&&checkPassword()){
+					$.ajax({
+						url:ipAddr+"/user/accredit",
+						data:{
+							phone:$("#phone").val(),
+							password:$("#password").val()
+						},
+						dataType:"json",
+						xhrFields: {
+							withCredentials: true //允许跨域带Cookie
+						},
+						type:"post",
+						success:function (data) {
+							if(data==true){
+								location.href="index.html"
+							}else {
+								$("#errorMsg").html("密码错误，或账户已停用")
+							}
+						}
+					})
+				}
+			});
+			$("#username").blur(checkUsername);
+			$("#password").blur(checkPassword);
+		})
+
+
+	</script>
+</head>
+
+<body>
+<!--引入头部-->
+<div id="header"></div>
+    <!-- 头部 end -->
+    <section id="login_wrap">
+        <div class="fullscreen-bg" style="background: url(images/login__bg.jpg);height: 532px;">
+        	
+        </div>
+        <div class="login-box">
+        	<div class="title">
+        		<!--<img src="images/login_logo.png" alt="">-->
+        		<span style="color: white">欢迎登录</span>
+        	</div>
+        	<div class="login_inner">
+
+				<!--登录错误提示消息-->
+        		<div id="errorMsg" class="alert alert-danger" ></div>
+				<form>
+					<input name="phone" id="phone" type="text" placeholder="请输入手机号" autocomplete="off">
+        			<input name="password" id="password" type="password" placeholder="请输入密码" autocomplete="off">
+			<div class="submit_btn" style="margin-top: 10px">
+        				<button type="button" id="btn_login" style="background-color: #CC5233;color: white">登录</button>
+        			</div>
+					<div style=" margin-top: 15px;line-height: 40px;text-align: center;">
+						<a href="forgetPassword.html" style="width: 100%;height: 80%;font-size: 15px">忘记密码</a>
+					</div>
+        		</form>
+        		<div class="reg">没有账户？<a href="register.html">立即注册</a></div>
+        	</div>
+        </div>
+    </section>
+    <!--引入尾部-->
+    <div id="footer"></div>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <!--导入布局js，共享header和footer-->
+    <script type="text/javascript" src="js/include.js"></script>
+</body>
+
+</html>
